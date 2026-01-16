@@ -34850,6 +34850,7 @@ async function run() {
     const postComment = createPoster();
     try {
         if (!pullRequest) {
+            (0, core_1.setFailed)("Not a Pull Request");
             throw new Error("This action can only be run on Pull Requests");
         }
         let mainVersion = await runCommand('git', ['show', `origin/main:Cargo.toml`], { ignoreReturnCode: true });
@@ -34911,6 +34912,7 @@ async function runCommand(command, args, options) {
 function getVersion(inp) {
     //TODO
 }
+run();
 /*if (!process.env.JEST_WORKER_ID) {
   run();
 }*/ 
