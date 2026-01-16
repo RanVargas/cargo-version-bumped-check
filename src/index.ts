@@ -24,7 +24,9 @@ export async function run() {
     if (!mainBranch) {
       setFailed("Cannot determine repository default branch");
     }
-    let mainVersion = await runCommand('git', ['show', `personal/master:Cargo.toml`], { ignoreReturnCode: true });
+    const showcaseBranches = await runCommand('git', ['branch']);
+    console.log(`The branches are: ${showcaseBranches.stdout}`);
+    let mainVersion = await runCommand('git', ['show', `origin/main:Cargo.toml`], { ignoreReturnCode: true });
     if (!mainVersion.success || (mainVersion.stderr.includes('invalid')) || mainVersion.stdout.includes('fatal')) {
       mainVersion = await runCommand('git', ['show', 'origin/master:Cargo.toml'], { ignoreReturnCode: true});
       if (!mainVersion.success) {
