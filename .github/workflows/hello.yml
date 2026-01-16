@@ -3,6 +3,8 @@ name: "Hello"
 on:
   pull_request:
     branches: [master, main]
+  push:
+
    
 jobs:
   version-bumped-checker:

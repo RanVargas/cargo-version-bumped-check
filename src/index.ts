@@ -15,6 +15,7 @@ export async function run() {
   try {
     if (!pullRequest) {
       throw new Error("This action can only be run on Pull Requests");
+      setFailed("Not a Pull Request");
     }
     
     let mainVersion = await runCommand('git', ['show', `origin/main:Cargo.toml`], { ignoreReturnCode: true });
