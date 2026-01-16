@@ -103,7 +103,3 @@ function getVersion(inp: any) {
 }
 
 run();
-
-/*if (!process.env.JEST_WORKER_ID) {
-  run();
-}*/
