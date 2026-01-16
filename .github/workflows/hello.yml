@@ -2,16 +2,13 @@ name: "Hello"
 
 on:
   pull_request:
-    types: [opened, reopened]
-  push:
-    branches: [master]
+    branches: [master, main]
    
 jobs:
-  hello:
+  version-bumped-checker:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: ./
         with:
-          gh-token: ${{ secrets.GITHUB_TOKEN }}
-          label: 'needs-review'
+          github_token: ${{ secrets.GITHUB_TOKEN }}

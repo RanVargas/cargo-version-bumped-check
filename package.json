@@ -11,12 +11,14 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@types/semver": "^7.7.1",
     "typescript": "^5.9.3"
   },
   "dependencies": {
     "@actions/core": "^2.0.2",
     "@actions/exec": "^2.0.0",
     "@actions/github": "^7.0.0",
-    "@vercel/ncc": "^0.38.4"
+    "@vercel/ncc": "^0.38.4",
+    "semver": "^7.7.3"
   }
 }

@@ -1,0 +1,22 @@
+[package]
+name = "amazing-cargo-file-you-should-read"
+version = "0.1.3"
+edition = "2021"
+
+[[bin]]
+name = "amazing-cargo-file-you-should-read"
+path = "src/main.rs"
+
+[lints.clippy]
+unwrap_used = "deny"
+
+[dependencies]
+actix-web = "4.9.0"
+strum = "0.27.2"
+strum_macros = "0.27.2"
+derivative = "2.2.0"
+
+
+[dev-dependencies]
+actix-rt = "2.10.0"
+once_cell = "1.20.3"

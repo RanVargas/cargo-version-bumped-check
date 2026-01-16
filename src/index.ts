@@ -1,37 +1,49 @@
 import { getInput, info, setFailed } from "@actions/core";
 import { context, getOctokit } from "@actions/github";
-import { ExecOptions } from "@actions/exec";
+import { ExecOptions, getExecOutput } from "@actions/exec";
+import { gte } from 'semver';
 
 
 export async function run() {
-  const token = getInput("gh-token");
-  const label = getInput("label");
-
-  try {
-    const skipLabel = getInput("skipLabel");
-    info(`Skip label: ${skipLabel}`);
-
-    const pullRequest = context.payload;
-    const labelNames = pullRequest
-
-  } catch (err) {
-    setFailed((err as Error)?.message ?? "Unknown error")
-  }
+  const token = getInput("github_token");
+  //const label = getInput("label");
 
   const octokit = getOctokit(token);
   const pullRequest = context.payload.pull_request;
+  const postComment = createPoster();
 
   try {
     if (!pullRequest) {
       throw new Error("This action can only be run on Pull Requests");
     }
+    
+    let mainVersion = await runCommand('git', ['show', `origin/main:Cargo.toml`], { ignoreReturnCode: true });
+    if (!mainVersion.success || (mainVersion.stderr.includes('invalid'))) {
+      mainVersion = await runCommand('git', ['show', 'origin/master:Cargo.toml'], { ignoreReturnCode: true});
+      if (!mainVersion.success) {
+        setFailed(mainVersion.stderr ?? "Unknown error when retrieving main/master's version");
+      }
+    }
+    
+    let curVersion = await runCommand('cat', ['Cargo.toml'], { ignoreReturnCode: true});
+    if (!curVersion.success) {
+      setFailed(curVersion.stderr ?? "Unknown error trying to incoming version");
+    }
+    const parsedMain = mainVersion.stdout.match(/version\s*=\s*["'](.*?)["']/)![1];
+    const parsedCur = curVersion.stdout.match(/version\s*=\s*["'](.*?)["']/)![1];
+    console.log("Master version: ", parsedMain);
+    console.log("Incoming Current Version: ", parsedCur);
+    if (gte(parsedMain, parsedCur)) {
+      postComment("Main/Master's version is greater or equals to incoming version, please fix this.");
+      setFailed(`Main/Master's Version is greater than incoming version, please bump the version before continuing`);
+    }
 
-    await octokit.rest.issues.addLabels({
+    /*await octokit.rest.issues.addLabels({
       owner: context.repo.owner,
       repo: context.repo.repo,
       issue_number: pullRequest.number,
       labels: [label],
-    });
+    });*/
   } catch (error) {
     setFailed((error as Error)?.message ?? "Unknown error");
   }
@@ -51,13 +63,20 @@ function createPoster() {
     }
 }
 
+interface ExecResult {
+  success: boolean;
+  exitCode: number;
+  stdout: string;
+  stderr: string;
+}
+
 async function runCommand(
   command: string,
   args?: string[],
   options?: ExecOptions & { ignoreReturnCode?: boolean }
 ): Promise<ExecResult> {
-  const result = await exec.getExecOutput(command, args, {
-    ignoreReturnCode: true,   // ← very important
+  const result = await getExecOutput(command, args, {
+    ignoreReturnCode: true,   
     ...options
   });
 
@@ -70,6 +89,12 @@ async function runCommand(
     stderr: result.stderr
   };
 }
+
+function getVersion(inp: any) {
+  //TODO
+}
+
+
 
 /*if (!process.env.JEST_WORKER_ID) {
   run();

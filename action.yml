@@ -1,12 +1,12 @@
-name: "Label new pull request"
-description: "Add a label when a new PR is opened."
+name: "Check to see if incoming version is greater than main/master in pull request"
+description: "This action is used to verify that the version in Master/Main's Toml is greater than the incoming version of a PR."
 author: "AoXDev"
 
 inputs:
-  name:
-    description: "The name to say hello to"
+  github_token:
+    description: "Token to use for identification"
     required: true
-    default: "world"
+
 
 runs:
   using: "node16"
