@@ -6,6 +6,9 @@ inputs:
   github_token:
     description: "Token to use for identification"
     required: true
+  fetch-depth:
+    description: 'How many commits/history to fetch (0 = full history)'
+    required: true
 
 
 runs:
