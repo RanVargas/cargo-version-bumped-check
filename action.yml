@@ -1,13 +1,17 @@
-name: "Check to see if incoming version is greater than main/master in pull request"
-description: "This action is used to verify that the version in Master/Main's Toml is greater than the incoming version of a PR."
-author: "AoXDev"
+name: Enforce Cargo Version Bumped
+description: This action is used to verify that the version in Master/Main's Toml is greater than the incoming version of a PR.
+author: AoXDev
 
 inputs:
   github_token:
-    description: "Token to use for identification"
+    description: Token to use for identification
     required: true
+
+branding:
+  icon: check
+  color: purple
 
 
 runs:
-  using: "node16"
-  main: "dist/index.js"
+  using: node20
+  main: dist/index.js

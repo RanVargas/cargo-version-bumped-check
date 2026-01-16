@@ -12,6 +12,7 @@
   "description": "",
   "devDependencies": {
     "@types/semver": "^7.7.1",
+    "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   },
   "dependencies": {

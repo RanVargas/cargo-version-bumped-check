@@ -34843,24 +34843,25 @@ const exec_1 = __nccwpck_require__(5236);
 const semver_1 = __nccwpck_require__(2088);
 async function run() {
     var _a, _b, _c;
-    const token = (0, core_1.getInput)("github_token");
-    //const label = getInput("label");
-    const octokit = (0, github_1.getOctokit)(token);
     const pullRequest = github_1.context.payload.pull_request;
     const postComment = createPoster();
     try {
         if (!pullRequest) {
+            console.log(`The pull request event is: ${pullRequest}`);
+            (0, core_1.setFailed)("Not a Pull Request");
             throw new Error("This action can only be run on Pull Requests");
         }
+        await runCommand('git', ['fetch', '--all']);
         let mainVersion = await runCommand('git', ['show', `origin/main:Cargo.toml`], { ignoreReturnCode: true });
-        if (!mainVersion.success || (mainVersion.stderr.includes('invalid'))) {
+        if (!mainVersion.success || (mainVersion.stderr.includes('invalid')) || mainVersion.stdout.includes('fatal')) {
             mainVersion = await runCommand('git', ['show', 'origin/master:Cargo.toml'], { ignoreReturnCode: true });
             if (!mainVersion.success) {
                 (0, core_1.setFailed)((_a = mainVersion.stderr) !== null && _a !== void 0 ? _a : "Unknown error when retrieving main/master's version");
+                throw new Error("Failed to get main/master's version");
             }
         }
         let curVersion = await runCommand('cat', ['Cargo.toml'], { ignoreReturnCode: true });
-        if (!curVersion.success) {
+        if (!curVersion.success || curVersion.stdout.includes('fatal')) {
             (0, core_1.setFailed)((_b = curVersion.stderr) !== null && _b !== void 0 ? _b : "Unknown error trying to incoming version");
         }
         const parsedMain = mainVersion.stdout.match(/version\s*=\s*["'](.*?)["']/)[1];
@@ -34868,15 +34869,9 @@ async function run() {
         console.log("Master version: ", parsedMain);
         console.log("Incoming Current Version: ", parsedCur);
         if ((0, semver_1.gte)(parsedMain, parsedCur)) {
-            postComment("Main/Master's version is greater or equals to incoming version, please fix this.");
-            (0, core_1.setFailed)(`Main/Master's Version is greater than incoming version, please bump the version before continuing`);
+            await postComment("Master's version is greater or equals to incoming version, please fix this.");
+            (0, core_1.setFailed)(`Master's Version is greater than incoming version, please bump the version before continuing`);
         }
-        /*await octokit.rest.issues.addLabels({
-          owner: context.repo.owner,
-          repo: context.repo.repo,
-          issue_number: pullRequest.number,
-          labels: [label],
-        });*/
     }
     catch (error) {
         (0, core_1.setFailed)((_c = error === null || error === void 0 ? void 0 : error.message) !== null && _c !== void 0 ? _c : "Unknown error");
@@ -34884,7 +34879,7 @@ async function run() {
 }
 function createPoster() {
     var _a;
-    const githubToken = (0, core_1.getInput)("github-token");
+    const githubToken = (0, core_1.getInput)("github_token");
     const pullRequestNumber = (_a = github_1.context.payload.pull_request) === null || _a === void 0 ? void 0 : _a.number;
     const octkit = (0, github_1.getOctokit)(githubToken);
     return function postComment(msg) {
@@ -34908,12 +34903,7 @@ async function runCommand(command, args, options) {
         stderr: result.stderr
     };
 }
-function getVersion(inp) {
-    //TODO
-}
-/*if (!process.env.JEST_WORKER_ID) {
-  run();
-}*/ 
+run();
 
 })();
 
