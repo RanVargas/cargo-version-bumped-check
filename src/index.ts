@@ -18,10 +18,10 @@ export async function run() {
       throw new Error("This action can only be run on Pull Requests");
       
     }
-    
-    let mainVersion = await runCommand('git', ['show', `personal/main:Cargo.toml`], { ignoreReturnCode: true });
+    //git show personal/master:Cargo.toml
+    let mainVersion = await runCommand('git', ['show', `origin/main:Cargo.toml`], { ignoreReturnCode: true });
     if (!mainVersion.success || (mainVersion.stderr.includes('invalid')) || mainVersion.stdout.includes('fatal')) {
-      mainVersion = await runCommand('git', ['show', 'personal/master:Cargo.toml'], { ignoreReturnCode: true});
+      mainVersion = await runCommand('git', ['show', 'origin/master:Cargo.toml'], { ignoreReturnCode: true});
       if (!mainVersion.success) {
         setFailed(mainVersion.stderr ?? "Unknown error when retrieving main/master's version");
       }

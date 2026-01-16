@@ -34853,9 +34853,10 @@ async function run() {
             (0, core_1.setFailed)("Not a Pull Request");
             throw new Error("This action can only be run on Pull Requests");
         }
-        let mainVersion = await runCommand('git', ['show', `personal/main:Cargo.toml`], { ignoreReturnCode: true });
+        //git show personal/master:Cargo.toml
+        let mainVersion = await runCommand('git', ['show', `origin/main:Cargo.toml`], { ignoreReturnCode: true });
         if (!mainVersion.success || (mainVersion.stderr.includes('invalid')) || mainVersion.stdout.includes('fatal')) {
-            mainVersion = await runCommand('git', ['show', 'personal/master:Cargo.toml'], { ignoreReturnCode: true });
+            mainVersion = await runCommand('git', ['show', 'origin/master:Cargo.toml'], { ignoreReturnCode: true });
             if (!mainVersion.success) {
                 (0, core_1.setFailed)((_a = mainVersion.stderr) !== null && _a !== void 0 ? _a : "Unknown error when retrieving main/master's version");
             }
