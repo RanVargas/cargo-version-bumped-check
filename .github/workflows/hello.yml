@@ -12,3 +12,4 @@ jobs:
       - uses: ./
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0

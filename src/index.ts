@@ -19,7 +19,11 @@ export async function run() {
       
     }
     //git show personal/master:Cargo.toml
-    let mainVersion = await runCommand('git', ['show', `origin/main:Cargo.toml`], { ignoreReturnCode: true });
+    const mainBranch = context.payload.repository?.default_branch;
+    if (!mainBranch) {
+      setFailed("Cannot determine repository default branch");
+    }
+    let mainVersion = await runCommand('git', ['show', `${mainBranch}:Cargo.toml`], { ignoreReturnCode: true });
     if (!mainVersion.success || (mainVersion.stderr.includes('invalid')) || mainVersion.stdout.includes('fatal')) {
       mainVersion = await runCommand('git', ['show', 'origin/master:Cargo.toml'], { ignoreReturnCode: true});
       if (!mainVersion.success) {
@@ -36,7 +40,7 @@ export async function run() {
     console.log("Master version: ", parsedMain);
     console.log("Incoming Current Version: ", parsedCur);
     if (gte(parsedMain, parsedCur)) {
-      postComment("Main/Master's version is greater or equals to incoming version, please fix this.");
+      await postComment("Main/Master's version is greater or equals to incoming version, please fix this.");
       setFailed(`Main/Master's Version is greater than incoming version, please bump the version before continuing`);
     }
 
