@@ -34926,6 +34926,8 @@ async function commentOnPR(passStatus, msg = "") {
                     issue_number: pullRequestNumber,
                     body: msg,
                 });
+                const commentexist = botComment == null;
+                (0, core_1.info)(`Updated existing comment to reflect failure, is botComment null: ${commentexist}`);
             }
         }
         else if (passStatus == true) {

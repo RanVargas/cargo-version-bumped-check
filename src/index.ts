@@ -117,6 +117,8 @@ async function commentOnPR(passStatus: boolean, msg: string | null = "") {
           issue_number: pullRequestNumber!,
           body: msg!,
         });
+        const commentexist = botComment == null;
+        info(`Updated existing comment to reflect failure, is botComment null: ${commentexist}`);
       }
     } else if (passStatus == true) {
       if (botComment) {
