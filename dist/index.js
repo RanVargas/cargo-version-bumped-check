@@ -34851,17 +34851,21 @@ async function run() {
             (0, core_1.setFailed)("Not a Pull Request");
             throw new Error("This action can only be run on Pull Requests");
         }
-        await runCommand('git', ['fetch', '--all']);
-        let mainVersion = await runCommand('git', ['show', `origin/main:Cargo.toml`], { ignoreReturnCode: true });
-        if (!mainVersion.success || (mainVersion.stderr.includes('invalid')) || mainVersion.stdout.includes('fatal')) {
-            mainVersion = await runCommand('git', ['show', 'origin/master:Cargo.toml'], { ignoreReturnCode: true });
+        await runCommand("git", ["fetch", "--all"]);
+        let mainVersion = await runCommand("git", ["show", `origin/main:Cargo.toml`], { ignoreReturnCode: true });
+        if (!mainVersion.success ||
+            mainVersion.stderr.includes("invalid") ||
+            mainVersion.stdout.includes("fatal")) {
+            mainVersion = await runCommand("git", ["show", "origin/master:Cargo.toml"], { ignoreReturnCode: true });
             if (!mainVersion.success) {
                 (0, core_1.setFailed)((_a = mainVersion.stderr) !== null && _a !== void 0 ? _a : "Unknown error when retrieving main/master's version");
                 throw new Error("Failed to get main/master's version");
             }
         }
-        let curVersion = await runCommand('cat', ['Cargo.toml'], { ignoreReturnCode: true });
-        if (!curVersion.success || curVersion.stdout.includes('fatal')) {
+        let curVersion = await runCommand("cat", ["Cargo.toml"], {
+            ignoreReturnCode: true,
+        });
+        if (!curVersion.success || curVersion.stdout.includes("fatal")) {
             (0, core_1.setFailed)((_b = curVersion.stderr) !== null && _b !== void 0 ? _b : "Unknown error trying to incoming version");
         }
         const parsedMain = mainVersion.stdout.match(/version\s*=\s*["'](.*?)["']/)[1];
@@ -34887,7 +34891,7 @@ function createPoster() {
         octkit.rest.issues.createComment({
             ...github_1.context.repo,
             issue_number: pullRequestNumber,
-            body: msg
+            body: msg,
         });
     };
 }
@@ -34896,14 +34900,6 @@ async function commentOnPR(passStatus, msg = "") {
     const githubToken = (0, core_1.getInput)("github_token");
     const pullRequestNumber = (_a = github_1.context.payload.pull_request) === null || _a === void 0 ? void 0 : _a.number;
     const octokit = (0, github_1.getOctokit)(githubToken);
-    if (passStatus == false) {
-        await octokit.rest.issues.createComment({
-            ...github_1.context.repo,
-            issue_number: pullRequestNumber,
-            body: msg
-        });
-        return;
-    }
     try {
         const { data: comments } = await octokit.rest.issues.listComments({
             ...github_1.context.repo,
@@ -34912,24 +34908,43 @@ async function commentOnPR(passStatus, msg = "") {
         const botComment = comments.find((comment) => {
             var _a, _b, _c;
             return ((_a = comment.user) === null || _a === void 0 ? void 0 : _a.type) === "Bot" &&
-                (((_b = comment.body) === null || _b === void 0 ? void 0 : _b.includes("Version check passed")) || ((_c = comment.body) === null || _c === void 0 ? void 0 : _c.includes("please fix this")));
+                (((_b = comment.body) === null || _b === void 0 ? void 0 : _b.includes("Version check passed")) ||
+                    ((_c = comment.body) === null || _c === void 0 ? void 0 : _c.includes("please fix this")));
         });
-        (0, core_1.info)("Bot comment found, updating is meant to happen");
-        if (botComment) {
-            await octokit.rest.issues.updateComment({
-                ...github_1.context.repo,
-                comment_id: botComment.id,
-                body: "✅ Version check passed! The incoming version is greater than master's version.",
-            });
-            (0, core_1.info)("Updated existing comment to reflect success");
+        if (passStatus == false) {
+            if (botComment) {
+                await octokit.rest.issues.updateComment({
+                    ...github_1.context.repo,
+                    comment_id: botComment.id,
+                    body: msg,
+                });
+                (0, core_1.info)("Updated existing comment to reflect failure");
+            }
+            else {
+                await octokit.rest.issues.createComment({
+                    ...github_1.context.repo,
+                    issue_number: pullRequestNumber,
+                    body: msg,
+                });
+            }
         }
-        else {
-            await octokit.rest.issues.createComment({
-                ...github_1.context.repo,
-                issue_number: pullRequestNumber,
-                body: "✅ Version check passed! The incoming version is greater than master's version.",
-            });
-            (0, core_1.info)("Posted new success comment");
+        else if (passStatus == true) {
+            if (botComment) {
+                await octokit.rest.issues.updateComment({
+                    ...github_1.context.repo,
+                    comment_id: botComment.id,
+                    body: "✅ Version check passed! The incoming version is greater than master's version.",
+                });
+                (0, core_1.info)("Updated existing comment to reflect success");
+            }
+            else {
+                await octokit.rest.issues.createComment({
+                    ...github_1.context.repo,
+                    issue_number: pullRequestNumber,
+                    body: "✅ Version check passed! The incoming version is greater than master's version.",
+                });
+                (0, core_1.info)("Posted new success comment");
+            }
         }
     }
     catch (error) {
@@ -34939,14 +34954,14 @@ async function commentOnPR(passStatus, msg = "") {
 async function runCommand(command, args, options) {
     const result = await (0, exec_1.getExecOutput)(command, args, {
         ignoreReturnCode: true,
-        ...options
+        ...options,
     });
     const success = result.exitCode === 0 || !!(options === null || options === void 0 ? void 0 : options.ignoreReturnCode);
     return {
         success,
         exitCode: result.exitCode,
         stdout: result.stdout,
-        stderr: result.stderr
+        stderr: result.stderr,
     };
 }
 run();

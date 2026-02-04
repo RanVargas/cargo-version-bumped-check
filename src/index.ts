@@ -108,14 +108,14 @@ async function commentOnPR(passStatus: boolean, msg: string | null = "") {
         await octokit.rest.issues.updateComment({
           ...context.repo,
           comment_id: botComment.id,
-          body: msg,
+          body: msg!,
         });
         info("Updated existing comment to reflect failure");
       } else {
         await octokit.rest.issues.createComment({
           ...context.repo,
           issue_number: pullRequestNumber!,
-          body: msg,
+          body: msg!,
         });
       }
     } else if (passStatus == true) {
