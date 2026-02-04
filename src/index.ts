@@ -111,6 +111,7 @@ async function commentOnPR(passStatus: boolean, msg: string | null = "") {
           body: msg!,
         });
         info("Updated existing comment to reflect failure");
+        return;
       } else {
         await octokit.rest.issues.createComment({
           ...context.repo,
@@ -119,6 +120,7 @@ async function commentOnPR(passStatus: boolean, msg: string | null = "") {
         });
         const commentexist = botComment == null;
         info(`Updated existing comment to reflect failure, is botComment null: ${commentexist}`);
+        return;
       }
     } else if (passStatus == true) {
       if (botComment) {
@@ -128,6 +130,7 @@ async function commentOnPR(passStatus: boolean, msg: string | null = "") {
           body: "✅ Version check passed! The incoming version is greater than master's version.",
         });
         info("Updated existing comment to reflect success");
+        return;
       } else {
         await octokit.rest.issues.createComment({
           ...context.repo,
@@ -135,6 +138,7 @@ async function commentOnPR(passStatus: boolean, msg: string | null = "") {
           body: "✅ Version check passed! The incoming version is greater than master's version.",
         });
         info("Posted new success comment");
+        return;
       }
     }
   } catch (error) {

@@ -34919,6 +34919,7 @@ async function commentOnPR(passStatus, msg = "") {
                     body: msg,
                 });
                 (0, core_1.info)("Updated existing comment to reflect failure");
+                return;
             }
             else {
                 await octokit.rest.issues.createComment({
@@ -34928,6 +34929,7 @@ async function commentOnPR(passStatus, msg = "") {
                 });
                 const commentexist = botComment == null;
                 (0, core_1.info)(`Updated existing comment to reflect failure, is botComment null: ${commentexist}`);
+                return;
             }
         }
         else if (passStatus == true) {
@@ -34938,6 +34940,7 @@ async function commentOnPR(passStatus, msg = "") {
                     body: "✅ Version check passed! The incoming version is greater than master's version.",
                 });
                 (0, core_1.info)("Updated existing comment to reflect success");
+                return;
             }
             else {
                 await octokit.rest.issues.createComment({
@@ -34946,6 +34949,7 @@ async function commentOnPR(passStatus, msg = "") {
                     body: "✅ Version check passed! The incoming version is greater than master's version.",
                 });
                 (0, core_1.info)("Posted new success comment");
+                return;
             }
         }
     }
