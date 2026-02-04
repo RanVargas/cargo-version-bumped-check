@@ -34872,6 +34872,7 @@ async function run() {
             await postComment("Master's version is greater or equals to incoming version, please fix this.");
             (0, core_1.setFailed)(`Master's Version is greater than incoming version, please bump the version before continuing`);
         }
+        await updateCommentToSuccess();
     }
     catch (error) {
         (0, core_1.setFailed)((_c = error === null || error === void 0 ? void 0 : error.message) !== null && _c !== void 0 ? _c : "Unknown error");
@@ -34889,6 +34890,42 @@ function createPoster() {
             body: msg
         });
     };
+}
+async function updateCommentToSuccess() {
+    var _a;
+    const githubToken = (0, core_1.getInput)("github_token");
+    const pullRequestNumber = (_a = github_1.context.payload.pull_request) === null || _a === void 0 ? void 0 : _a.number;
+    const octokit = (0, github_1.getOctokit)(githubToken);
+    try {
+        const { data: comments } = await octokit.rest.issues.listComments({
+            ...github_1.context.repo,
+            issue_number: pullRequestNumber,
+        });
+        const botComment = comments.find((comment) => {
+            var _a, _b;
+            return ((_a = comment.user) === null || _a === void 0 ? void 0 : _a.type) === "Bot" &&
+                ((_b = comment.body) === null || _b === void 0 ? void 0 : _b.includes("Master's version is greater or equals to incoming version"));
+        });
+        if (botComment) {
+            await octokit.rest.issues.updateComment({
+                ...github_1.context.repo,
+                comment_id: botComment.id,
+                body: "✅ Version check passed! The incoming version is greater than master's version.",
+            });
+            (0, core_1.info)("Updated existing comment to reflect success");
+        }
+        else {
+            await octokit.rest.issues.createComment({
+                ...github_1.context.repo,
+                issue_number: pullRequestNumber,
+                body: "✅ Version check passed! The incoming version is greater than master's version.",
+            });
+            (0, core_1.info)("Posted new success comment");
+        }
+    }
+    catch (error) {
+        (0, core_1.info)(`Failed to update comment: ${error === null || error === void 0 ? void 0 : error.message}`);
+    }
 }
 async function runCommand(command, args, options) {
     const result = await (0, exec_1.getExecOutput)(command, args, {

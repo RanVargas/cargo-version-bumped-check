@@ -38,6 +38,8 @@ export async function run() {
       setFailed(`Master's Version is greater than incoming version, please bump the version before continuing`);
     }
 
+    await updateCommentToSuccess();
+
   } catch (error) {
     setFailed((error as Error)?.message ?? "Unknown error");
   }
@@ -55,6 +57,43 @@ function createPoster() {
             body: msg
         })
     }
+}
+
+async function updateCommentToSuccess() {
+  const githubToken = getInput("github_token");
+  const pullRequestNumber = context.payload.pull_request?.number;
+  const octokit = getOctokit(githubToken);
+
+  try {
+    const { data: comments } = await octokit.rest.issues.listComments({
+      ...context.repo,
+      issue_number: pullRequestNumber!,
+    });
+
+    const botComment = comments.find(
+      (comment) =>
+        comment.user?.type === "Bot" &&
+        comment.body?.includes("Master's version is greater or equals to incoming version")
+    );
+
+    if (botComment) {
+      await octokit.rest.issues.updateComment({
+        ...context.repo,
+        comment_id: botComment.id,
+        body: "✅ Version check passed! The incoming version is greater than master's version.",
+      });
+      info("Updated existing comment to reflect success");
+    } else {
+      await octokit.rest.issues.createComment({
+        ...context.repo,
+        issue_number: pullRequestNumber!,
+        body: "✅ Version check passed! The incoming version is greater than master's version.",
+      });
+      info("Posted new success comment");
+    }
+  } catch (error) {
+    info(`Failed to update comment: ${(error as Error)?.message}`);
+  }
 }
 
 interface ExecResult {
