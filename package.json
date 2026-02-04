@@ -1,6 +1,6 @@
 {
   "name": "version-bumped-check",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "index.js",
   "scripts": {
     "build": "tsc && ncc build lib/index.js",
@@ -12,6 +12,7 @@
   "description": "",
   "devDependencies": {
     "@types/semver": "^7.7.1",
+    "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   },
   "dependencies": {
