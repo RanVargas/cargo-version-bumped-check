@@ -78,6 +78,8 @@ async function updateCommentToSuccess() {
         (comment.body?.includes("Version check passed") || comment.body?.includes("please fix this"))
     );
 
+    info("Bot comment found, updating is meant to happen");
+
     if (botComment) {
       await octokit.rest.issues.updateComment({
         ...context.repo,

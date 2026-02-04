@@ -34906,6 +34906,7 @@ async function updateCommentToSuccess() {
             return ((_a = comment.user) === null || _a === void 0 ? void 0 : _a.type) === "Bot" &&
                 (((_b = comment.body) === null || _b === void 0 ? void 0 : _b.includes("Version check passed")) || ((_c = comment.body) === null || _c === void 0 ? void 0 : _c.includes("please fix this")));
         });
+        (0, core_1.info)("Bot comment found, updating is meant to happen");
         if (botComment) {
             await octokit.rest.issues.updateComment({
                 ...github_1.context.repo,
